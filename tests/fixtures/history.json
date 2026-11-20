@@ -1,0 +1,42 @@
+{
+  "chat_session": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "title": "合成测试对话",
+    "version": 12,
+    "current_message_id": 10
+  },
+  "chat_messages": [
+    { "message_id": 1, "parent_id": null, "role": "USER", "accumulated_token_usage": 10,
+      "fragments": [{ "id": 1, "type": "REQUEST", "content": "问题一" }] },
+    { "message_id": 2, "parent_id": 1, "role": "ASSISTANT", "accumulated_token_usage": 60,
+      "fragments": [
+        { "id": 2, "type": "THINK", "content": "思考过程", "elapsed_secs": 3 },
+        { "id": 3, "type": "RESPONSE", "content": "**回答一**" }
+      ] },
+    { "message_id": 3, "parent_id": 2, "role": "USER", "accumulated_token_usage": 120,
+      "fragments": [
+        { "id": 4, "type": "FILE", "files": [{ "id": "file-a", "file_name": "截图.png", "is_image": true, "token_usage": 48, "file_size": 2048, "status": "SUCCESS", "signed_path": "https://chat.deepseek.com/file?file_id=file-a&state=synthetic-state" }] },
+        { "id": 5, "type": "REQUEST", "content": "看这张图" }
+      ] },
+    { "message_id": 4, "parent_id": 3, "role": "ASSISTANT", "accumulated_token_usage": 180,
+      "fragments": [
+        { "id": 6, "type": "RESPONSE", "content": "回答二" },
+        { "id": 7, "type": "TIP", "content": "This response is AI-generated, for reference only.", "style": "WARNING" }
+      ] },
+    { "message_id": 5, "parent_id": 4, "role": "USER", "accumulated_token_usage": 200,
+      "fragments": [{ "id": 8, "type": "REQUEST", "content": "被放弃的提问" }] },
+    { "message_id": 6, "parent_id": 5, "role": "ASSISTANT", "accumulated_token_usage": 260,
+      "fragments": [{ "id": 9, "type": "RESPONSE", "content": "被放弃的回答" }] },
+    { "message_id": 7, "parent_id": 4, "role": "USER", "accumulated_token_usage": 230,
+      "fragments": [{ "id": 10, "type": "FILE", "files": [{ "id": "file-b", "file_name": "报告.pdf", "is_image": false, "token_usage": 300 }] }] },
+    { "message_id": 8, "parent_id": 7, "role": "ASSISTANT", "accumulated_token_usage": 300,
+      "fragments": [
+        { "id": 11, "type": "THINK", "content": "再想想" },
+        { "id": 12, "type": "RESPONSE", "content": "回答三" }
+      ] },
+    { "message_id": 9, "parent_id": 8, "role": "USER", "accumulated_token_usage": 320,
+      "fragments": [{ "id": 13, "type": "REQUEST", "content": "问题四" }] },
+    { "message_id": 10, "parent_id": 9, "role": "ASSISTANT", "accumulated_token_usage": 400,
+      "fragments": [{ "id": 14, "type": "RESPONSE", "content": "回答四" }] }
+  ]
+}

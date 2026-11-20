@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全问题 / Security vulnerability
+    url: https://github.com/wbxs2077/deepseek-api-mode-web/security/advisories/new
+    about: 请私下报告，不要公开提 Issue / Report privately, not in a public issue

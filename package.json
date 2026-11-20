@@ -1,0 +1,43 @@
+{
+  "name": "deepseek-api-mode-web",
+  "version": "0.3.3",
+  "description": "Unofficial Chrome extension: continue chat.deepseek.com conversations in place with your own DeepSeek API key.",
+  "license": "MIT",
+  "author": "wbxs2077 <wbxs2077@outlook.com>",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": [
+    "deepseek",
+    "chrome-extension",
+    "wxt",
+    "preact",
+    "api"
+  ],
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "test": "vitest run",
+    "test:browser": "node --test tests/mount.browser.mjs",
+    "e2e": "wxt build && node e2e/regression.mjs && node e2e/fault-scenarios.mjs",
+    "typecheck": "wxt prepare && tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.18",
+    "katex": "^0.19.1",
+    "marked": "^18.2.1",
+    "preact": "^11.2.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "fake-indexeddb": "^6.2.8",
+    "playwright": "^1.65.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1",
+    "wxt": "^0.21.5"
+  }
+}

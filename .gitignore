@@ -1,0 +1,17 @@
+# Dependencies and generated files
+node_modules/
+.wxt/
+.output/
+*.zip
+
+# End-to-end reports and screenshots
+e2e/reports/
+
+# Local environment and editors
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

@@ -1,0 +1,54 @@
+name: 问题反馈 / Bug report
+description: 功能不正常或报错 / Something does not work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **请不要粘贴 API Key、登录 token、Cookie 或真实对话内容，截图前请打码。**
+        Never paste API keys, login tokens, cookies or real conversation content.
+  - type: input
+    id: version
+    attributes:
+      label: 扩展版本 / Extension version
+      description: 在 chrome://extensions 上可以看到 / Shown on chrome://extensions
+      placeholder: "0.3.3"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: 浏览器与版本 / Browser and version
+      placeholder: "Chrome 157"
+    validations:
+      required: true
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: 场景 / Scenario
+      options:
+        - 普通对话 / Normal conversation
+        - 7 天不活跃的对话 / Conversation inactive for 7 days
+        - 多个标签页 / Multiple tabs
+        - 附件或智能搜索 / Attachments or smart search
+        - 其他 / Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期与实际结果 / Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: 控制台报错（可选） / Console errors (optional)
+      description: 删除其中的对话正文和个人信息 / Remove conversation text and personal data
+      render: text

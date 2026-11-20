@@ -1,0 +1,40 @@
+:root {
+  color-scheme: light dark;
+  --bg: #fff;
+  --fg: #1f2329;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #4d6bfe;
+  --error: #c62828;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1b1c1f;
+    --fg: #e6e7ea;
+    --muted: #9aa0aa;
+    --line: #33363c;
+    --error: #ff8a80;
+  }
+}
+
+* { box-sizing: border-box; }
+body { width: 340px; margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.6 system-ui, "Microsoft YaHei", sans-serif; }
+main { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+h1 { margin: 0; font-size: 16px; }
+h2 { margin: 0 0 6px; font-size: 14px; }
+section { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+p { margin: 0; }
+
+button, select, input { font: inherit; color: inherit; }
+button { padding: 5px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+select, input[type="password"] { border: 1px solid var(--line); border-radius: 6px; background: var(--bg); padding: 5px 8px; }
+input[type="password"] { width: 100%; }
+label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+label.check { justify-content: flex-start; }
+
+.row { display: flex; gap: 8px; }
+.balance { align-items: center; justify-content: space-between; }
+.note { color: var(--muted); font-size: 12px; }
+.error { color: var(--error); margin: 12px; }
