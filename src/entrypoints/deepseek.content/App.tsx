@@ -988,9 +988,10 @@ function CostEstimate({ record, settings, images }: { record: SessionRecord; set
     <ul class="estimate">
       <li>上下文：约 {formatTokens(input)}（{model}）</li>
       <li>
-        每次发送预计：最多约 {yuan(maxCost(model, input, output, peak))}（{peak ? '高峰时段' : '空闲时段'}，含最多 {num(output)} tokens 的回复）
+        按当前导入历史估算，每次发送约 {yuan(maxCost(model, input, output, peak))}（{peak ? '高峰时段' : '空闲时段'}，含最多 {num(output)} tokens 的回复）
         {hasFiles(record.imported) || images > 0 ? '，附件解析内容未计入' : ''}
       </li>
+      <li>后续提问和新回合会让每次发送的上下文变长。实际按用量扣费，以开放平台账单为准。</li>
     </ul>
   );
 }

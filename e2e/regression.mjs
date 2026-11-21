@@ -1153,7 +1153,8 @@ try {
     const card = await v.text();
     e.card = card.split("\n").filter((l) => /上下文|预计/.test(l));
     assert(/上下文：约 [\d,.]+ (万 )?token（deepseek-flash）/.test(card), "context estimate");
-    assert(/每次发送预计：最多约 ¥\d+\.\d+（(高峰|空闲)时段，含最多 65,536 tokens 的回复）/.test(card), "cost upper bound");
+    assert(/按当前导入历史估算，每次发送约 ¥\d+\.\d+（(高峰|空闲)时段，含最多 65,536 tokens 的回复）/.test(card), "cost estimate");
+    assert(card.includes("实际按用量扣费"), "cost billed by usage");
     assert(!card.includes("官网历史累计"), "old cumulative line removed");
   });
   await test("v0.3.2 formulas, code copy, question copy, cost and local-only note", async (e) => {

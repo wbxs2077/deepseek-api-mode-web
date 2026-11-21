@@ -19,7 +19,7 @@ The UI is in Chinese. An Android counterpart is at [deepseek-api-mode-android](h
 - Streaming, reasoning, smart search (web search and URL reading) with citations
 - Attachments: picker, drag and drop, pasted screenshots. PDF, Word and PowerPoint use layout-aware parsing.
 - Optionally carries images from the official history
-- Shows the maximum cost before sending, the cost of each reply, and your balance in the popup
+- Shows an estimated cost before sending, the cost of each reply, and your balance in the popup
 - KaTeX formulas, code-block copy, question copy
 - Edit the last question, regenerate, stop and retry
 
@@ -46,7 +46,7 @@ Then open `chrome://extensions`, turn on Developer mode, click "Load unpacked" a
 
 ## Cost
 
-Every send includes the imported history and the local turns, billed to your key. The amount shown before you start is an upper bound: it assumes no input hits the cache and the reply uses the full output limit. Actual cost is usually much lower. The price table is in [`src/core/pricing.ts`](src/core/pricing.ts).
+Every send includes the imported history and the local turns, billed to your key. The amount shown before you start is an estimate for the currently imported history only: it assumes no input hits the cache and the reply uses the full output limit. Token counts are estimated and parsed attachment content is not included. Later questions and new turns make the context longer, so each send costs more. Much of the history usually hits the cache on follow-ups; you are billed by actual usage, as shown on the API platform. The price table is in [`src/core/pricing.ts`](src/core/pricing.ts).
 
 ## Development
 

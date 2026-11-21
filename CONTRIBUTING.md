@@ -20,7 +20,7 @@ npm run dev
 
 ## 提交 PR 前
 
-请确保以下检查全部通过（CI 也会运行前四项）：
+请确保以下检查全部通过（CI 会自动运行前三项；后两项浏览器测试需在 Actions 里手动触发 CI 并勾选 e2e）：
 
 ```bash
 npm run typecheck

@@ -11,7 +11,8 @@ const bundled = [
   { name: 'katex', file: 'LICENSE' },
   { name: 'marked', file: 'LICENSE' },
   { name: 'preact', file: 'LICENSE' },
-  { name: 'wxt', file: null, note: 'Runtime helpers only. MIT License, see https://github.com/wxt-dev/wxt/blob/main/LICENSE.' },
+  // The wxt npm package ships without a LICENSE file; scripts/licenses/wxt-LICENSE.txt is copied from the wxt-v0.21.5 tag.
+  { name: 'wxt', local: 'licenses/wxt-LICENSE.txt', note: 'Runtime helpers only.' },
 ];
 
 let out = '# Third-party notices\n\nThe built extension includes code from the following packages.\n';
@@ -22,9 +23,10 @@ for (const pkg of bundled) {
   if (meta.homepage) out += ` · ${meta.homepage}`;
   out += '\n';
   if (pkg.note) out += `\n${pkg.note}\n`;
-  if (pkg.file) {
+  if (pkg.file || pkg.local) {
     let text;
-    for (const candidate of [pkg.file, 'LICENSE', 'LICENSE.md']) {
+    if (pkg.local) text = await readFile(new URL(pkg.local, import.meta.url), 'utf8');
+    else for (const candidate of [pkg.file, 'LICENSE', 'LICENSE.md']) {
       try { text = await readFile(join(dir, candidate), 'utf8'); break; } catch {}
     }
     if (!text) throw new Error(`No license file for ${pkg.name}`);
