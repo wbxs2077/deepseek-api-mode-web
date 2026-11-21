@@ -1185,6 +1185,97 @@ try {
     await worker.evaluate(() => chrome.storage.local.set({ thinking: true, effort: "high" }));
   });
 
+  await test("v0.4.0 popup changes made during a reply apply to the next send on the same page", async (e) => {
+    await worker.evaluate(() => chrome.storage.local.set({ thinking: true, effort: "high", maxTokens: 0, model: "deepseek-flash", search: false }));
+    try {
+      const { id, v } = await populatedWithoutImages();
+      const q = "HOLD-popup-during-reply";
+      await holding(v, id, q);
+      assert.equal((await lastCall()).reasoning_effort, "high", "held reply uses the old effort");
+
+      // 生成期间打开弹窗改档，然后回到原对话。回到页面时的 focus 刷新会因为正在生成而被跳过。
+      const pop = await ctx.newPage();
+      await pop.goto(`chrome-extension://${extId}/popup.html`);
+      await pop.getByRole("radiogroup", { name: "思考强度" }).getByRole("radio", { name: "最高", exact: true }).click();
+      await pop.getByRole("combobox", { name: /输出上限/ }).selectOption("4096");
+      await pop.getByRole("combobox", { name: "模型" }).selectOption("deepseek-v4-pro");
+      await until(() => worker.evaluate(async () => {
+        const s = await chrome.storage.local.get(["effort", "maxTokens", "model"]);
+        return s.effort === "max" && s.maxTokens === 4096 && s.model === "deepseek-v4-pro";
+      }), "popup saved");
+      await pop.close();
+      await v.p.bringToFront();
+      await v.run(`dispatchEvent(new Event('focus'))`);
+
+      await worker.evaluate((q) => streams[q].end(), q);
+      await until(async () => (await contents(id))?.at(-1) === "REPLY-" + q, "held reply finished");
+      // 页面上看得到模型下拉框：它变成新值，说明回复结束后补读了设置。
+      await until(() => v.run(`return comp.querySelector('select[aria-label="模型"]').value === "deepseek-v4-pro"`), "page picked up popup settings");
+      await send(v, id, "AFTER-POPUP");
+      const next = await lastCall();
+      e.next = { model: next.model, effort: next.reasoning_effort, max_tokens: next.max_tokens };
+      assert.deepEqual(e.next, { model: "deepseek-v4-pro", effort: "max", max_tokens: 4096 }, "next send uses the new popup settings");
+    } finally {
+      // 失败时也还原，免得后面的估算用例读到 4096。
+      await worker.evaluate(() => chrome.storage.local.set({ effort: "high", maxTokens: 0, model: "deepseek-flash" }));
+    }
+  });
+
+  await test("v0.4.0 popup effort radiogroup works from the keyboard", async (e) => {
+    await worker.evaluate(() => chrome.storage.local.set({ thinking: true, effort: "high" }));
+    const pop = await ctx.newPage();
+    try {
+      await pop.goto(`chrome-extension://${extId}/popup.html`);
+      const group = pop.getByRole("radiogroup", { name: "思考强度" });
+      const radio = (name) => group.getByRole("radio", { name, exact: true });
+      await radio("高").waitFor();
+      e.tabIndex = await group.getByRole("radio").evaluateAll((rs) => rs.map((r) => r.tabIndex));
+      assert.deepEqual(e.tabIndex, [-1, 0, -1], "only the checked radio is in the tab order");
+      const saved = () => worker.evaluate(async () => (await chrome.storage.local.get("effort")).effort);
+      await radio("高").focus();
+      await pop.keyboard.press("ArrowRight");
+      await until(async () => (await saved()) === "max", "ArrowRight → max");
+      assert.equal(await radio("最高").getAttribute("aria-checked"), "true");
+      assert(await radio("最高").evaluate((r) => r === document.activeElement), "focus follows the selection");
+      await pop.keyboard.press("ArrowRight");
+      await until(async () => (await saved()) === "low", "ArrowRight wraps to low");
+      await pop.keyboard.press("ArrowLeft");
+      await until(async () => (await saved()) === "max", "ArrowLeft wraps to max");
+      await pop.keyboard.press("Home");
+      await until(async () => (await saved()) === "low", "Home → low");
+    } finally {
+      await pop.close();
+      await worker.evaluate(() => chrome.storage.local.set({ effort: "high" }));
+    }
+  });
+
+  await test("v0.4.0 popup keeps the typed key when saving it fails", async () => {
+    const pop = await ctx.newPage();
+    try {
+      await pop.goto(`chrome-extension://${extId}/popup.html`);
+      await pop.getByRole("button", { name: "更换" }).click();
+      const input = pop.locator("input[type=password]");
+      await input.fill("sk-synthetic-new-key");
+      // 只在弹窗页面里让写入失败，不影响 background。
+      await pop.evaluate(() => {
+        globalThis.realSet = chrome.storage.local.set.bind(chrome.storage.local);
+        chrome.storage.local.set = () => Promise.reject(new Error("synthetic quota error"));
+      });
+      await pop.getByRole("button", { name: "保存", exact: true }).click();
+      await until(async () => (await pop.getByRole("status").innerText()).includes("无法保存设置"), "save error shown");
+      assert.equal(await input.inputValue(), "sk-synthetic-new-key", "typed key kept after failure");
+      assert(await pop.getByRole("button", { name: "取消" }).isVisible(), "still editing");
+      assert.equal(await worker.evaluate(async () => (await chrome.storage.local.get("apiKey")).apiKey), "synthetic-regression-key");
+      await pop.evaluate(() => { chrome.storage.local.set = globalThis.realSet; });
+      await pop.getByRole("button", { name: "保存", exact: true }).click();
+      await until(() => worker.evaluate(async () => (await chrome.storage.local.get("apiKey")).apiKey === "sk-synthetic-new-key"), "retry saved");
+      assert.equal(await input.count(), 0, "input collapses after a successful save");
+    } finally {
+      await pop.close();
+      await worker.evaluate(() => chrome.storage.local.set({ apiKey: "synthetic-regression-key" }));
+    }
+  });
+
   await test("v0.3.2 confirm card estimates the cost before the first send", async (e) => {
     const id = fresh(),
       v = await page(id);

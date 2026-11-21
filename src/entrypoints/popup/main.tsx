@@ -55,13 +55,16 @@ function Popup() {
     }).catch((e) => setStatus(`无法读取设置：${errorText(e)}`));
   }, []);
 
-  async function patch(next: Partial<Settings>, done = '已保存') {
+  /** 返回是否保存成功。失败时只显示错误，界面保持原样。 */
+  async function patch(next: Partial<Settings>, done = '已保存'): Promise<boolean> {
     try {
       await saveSettings(next);
       setSettings((s) => (s ? { ...s, ...next } : s));
       setStatus(done);
+      return true;
     } catch (e) {
       setStatus(`无法保存设置：${errorText(e)}`);
+      return false;
     }
   }
 
@@ -69,10 +72,24 @@ function Popup() {
   const saved = settings.apiKey;
   const showInput = !saved || editing;
   async function saveKey() {
-    await patch({ apiKey: key.trim() }, '已保存 API Key。回到页面即可发送');
+    // 保存失败时保留输入，方便直接重试。
+    if (!(await patch({ apiKey: key.trim() }, '已保存 API Key。回到页面即可发送'))) return;
     setKey('');
     setEditing(false);
     void queryBalance();
+  }
+
+  // 单选组的键盘约定：整组只占一个 Tab 位，方向键在三档之间循环切换并移动焦点。
+  function effortKey(e: KeyboardEvent) {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    const edge = { Home: 0, End: EFFORTS.length - 1 }[e.key];
+    if (!settings || !settings.thinking || (step === undefined && edge === undefined)) return;
+    e.preventDefault();
+    const at = EFFORTS.indexOf(settings.effort);
+    const next = edge ?? (at + step! + EFFORTS.length) % EFFORTS.length;
+    void patch({ effort: EFFORTS[next] });
+    const radios = (e.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="radio"]');
+    radios[next]?.focus();
   }
 
   return (
@@ -135,10 +152,10 @@ function Popup() {
           </label>
           <div class="item">
             <span id="effort-label" class={settings.thinking ? '' : 'off'}>思考强度</span>
-            <div class="segmented" role="radiogroup" aria-labelledby="effort-label">
+            <div class="segmented" role="radiogroup" aria-labelledby="effort-label" onKeyDown={effortKey}>
               {EFFORTS.map((e) => (
                 <button key={e} role="radio" aria-checked={settings.effort === e} disabled={!settings.thinking}
-                  onClick={() => patch({ effort: e })}>{EFFORT_LABELS[e]}</button>
+                  tabIndex={settings.effort === e ? 0 : -1} onClick={() => patch({ effort: e })}>{EFFORT_LABELS[e]}</button>
               ))}
             </div>
           </div>

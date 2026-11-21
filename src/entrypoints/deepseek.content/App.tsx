@@ -83,6 +83,9 @@ export function App({ sessionId, layout, thread: threadHost, composer, notice }:
   const imagePort = useRef<Port | null>(null);
   const checkRef = useRef<HistoryCheck>('pending');
   const operating = useRef(false);
+  // 页面重新可见时的设置刷新因忙被跳过，空闲后补做。
+  const refreshMissed = useRef(false);
+  const refreshRef = useRef<(() => void) | null>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const filesRef = useRef<DraftFile[]>([]);
@@ -139,11 +142,20 @@ export function App({ sessionId, layout, thread: threadHost, composer, notice }:
 
   useEffect(() => {
     const refresh = () => {
-      if (document.visibilityState !== 'visible' || !sessionId || !onCurrentPage() || port.current || operating.current) return;
+      if (document.visibilityState !== 'visible' || !sessionId || !onCurrentPage()) return;
+      // 生成或其他操作进行中时跳过，结束后由下面的 effect 补做一次，弹窗里改的设置才能用于下一条。
+      if (port.current || operating.current) {
+        refreshMissed.current = true;
+        return;
+      }
       const gen = generation.current;
       const before = recordRef.current;
       void request({ type: 'get-state', sessionId }).then(({ session, settings }) => {
-        if (gen !== generation.current || !onCurrentPage() || port.current || operating.current || before !== recordRef.current) return;
+        if (gen !== generation.current || !onCurrentPage()) return;
+        if (port.current || operating.current || before !== recordRef.current) {
+          refreshMissed.current = true;
+          return;
+        }
         setSettings(settings);
         setLoaded(true);
         if (session?.updatedAt !== before?.updatedAt || session?.importedAt !== before?.importedAt) {
@@ -152,13 +164,21 @@ export function App({ sessionId, layout, thread: threadHost, composer, notice }:
         }
       }).catch(() => {});
     };
+    refreshRef.current = refresh;
     document.addEventListener('visibilitychange', refresh);
     window.addEventListener('focus', refresh);
     return () => {
+      refreshRef.current = null;
       document.removeEventListener('visibilitychange', refresh);
       window.removeEventListener('focus', refresh);
     };
   }, [sessionId, mode]);
+
+  useEffect(() => {
+    if (sending || busy || !refreshMissed.current) return;
+    refreshMissed.current = false;
+    refreshRef.current?.();
+  }, [sending, busy]);
 
   useLayoutEffect(() => {
     if (mode === 'api' && loaded && sessionId) void syncHistory(sessionId);
