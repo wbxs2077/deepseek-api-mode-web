@@ -6,6 +6,8 @@
 
 ## [0.4.0] - 2026-11-21
 
+首次公开发布。之前的版本只在作者本机使用，没有单独发布。
+
 ### Added
 - 弹窗「深度思考」下新增「思考强度」：低（low）、高（high）、最高（max），默认高，会记住上次的选择。开启深度思考时通过 `reasoning_effort` 发送所选档位，关闭时不发送。从旧版本升级时保留原来的深度思考开关，强度默认为高。
 - 选最高强度且输出上限跟随官方时，费用估算按 128K 输出计算。
@@ -20,7 +22,7 @@
 
 ## [0.3.3] - 2026-11-20
 
-首次公开发布。
+整理为开源仓库，未单独发布。
 
 ### Changed
 - 扩展显示名改为「API 续聊 for DeepSeek（非官方）」，弹窗注明非官方。
@@ -70,4 +72,3 @@
 
 [Unreleased]: https://github.com/wbxs2077/deepseek-api-mode-web/compare/v0.4.0...HEAD
 [0.4.0]: https://github.com/wbxs2077/deepseek-api-mode-web/releases/tag/v0.4.0
-[0.3.3]: https://github.com/wbxs2077/deepseek-api-mode-web/releases/tag/v0.3.3
