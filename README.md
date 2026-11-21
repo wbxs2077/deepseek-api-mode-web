@@ -160,3 +160,7 @@ chat.deepseek.com 对话页
 [MIT](LICENSE) © 2026 wbxs2077。打包进扩展的第三方库的许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 「DeepSeek」是其权利人的商标。本项目与 DeepSeek 没有关联，也未获其认可。
+
+## 致谢
+
+感谢 [LINUX DO](https://linux.do) 社区。

@@ -63,3 +63,7 @@ The end-to-end suites use synthetic pages and a mocked API. They need no login a
 ## License
 
 [MIT](LICENSE) © 2026 wbxs2077. Third-party notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). "DeepSeek" is a trademark of its owner; this project is not affiliated with or endorsed by DeepSeek.
+
+## Acknowledgements
+
+Thanks to the [LINUX DO](https://linux.do) community.
