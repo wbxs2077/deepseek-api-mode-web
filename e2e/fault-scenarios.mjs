@@ -379,7 +379,7 @@ const deleteLog = () => worker.evaluate(() => ({attempts: [...attempts], succeed
 const openPopup = async () => {
   const p = await ctx.newPage();
   await p.goto(`chrome-extension://${extId}/popup.html`);
-  await p.locator('input[type=password]').waitFor();
+  await p.getByRole('heading',{name:'API Key',exact:true}).waitFor();
   return p;
 };
 const cleanupStatus = p => p.evaluate(async () => {

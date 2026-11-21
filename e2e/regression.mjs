@@ -919,7 +919,11 @@ try {
     const text = await pop.locator("main").innerText();
     assert(text.includes("••••••••-key"));
     assert(!text.includes("synthetic-regression-key"));
+    // v0.4.0: with a key saved, the input stays hidden until 更换 is clicked, and opens empty.
+    assert.equal(await pop.locator("input[type=password]").count(), 0, "input hidden while key saved");
+    await pop.getByRole("button", { name: "更换" }).click();
     assert.equal(await pop.locator("input[type=password]").inputValue(), "");
+    await pop.getByRole("button", { name: "取消" }).click();
     // v0.3.2: the popup queries the balance through the worker with the saved key.
     await until(async () => (await pop.locator("main").innerText()).includes("账户余额：¥12.34"), "balance shown");
     assert.deepEqual(await worker.evaluate(() => globalThis.balanceReads), ["Bearer synthetic-regression-key"]);
@@ -1151,10 +1155,13 @@ try {
     await worker.evaluate(() => chrome.storage.local.remove("effort"));
     let pop = await ctx.newPage();
     await pop.goto(popupUrl);
-    const effort = () => pop.getByLabel("思考强度");
-    await effort().waitFor();
-    assert.equal(await effort().inputValue(), "high", "default effort");
-    await effort().selectOption("max");
+    const level = (name) => pop.getByRole("radiogroup", { name: "思考强度" }).getByRole("radio", { name, exact: true });
+    const checked = async () => {
+      for (const name of ["低", "高", "最高"]) if ((await level(name).getAttribute("aria-checked")) === "true") return name;
+    };
+    await level("高").waitFor();
+    assert.equal(await checked(), "高", "default effort");
+    await level("最高").click();
     await until(() => worker.evaluate(async () => (await chrome.storage.local.get("effort")).effort === "max"), "max saved");
     await pop.close();
 
@@ -1170,9 +1177,10 @@ try {
 
     pop = await ctx.newPage();
     await pop.goto(popupUrl);
-    await effort().waitFor();
-    assert.equal(await effort().inputValue(), "max", "effort restored");
-    assert(await effort().isDisabled(), "effort disabled while thinking is off");
+    await level("最高").waitFor();
+    assert.equal(await checked(), "最高", "effort restored");
+    assert(await level("最高").isDisabled(), "effort disabled while thinking is off");
+    assert.equal(await pop.getByRole("switch", { name: "深度思考" }).isChecked(), false, "thinking switch reflects storage");
     await pop.close();
     await worker.evaluate(() => chrome.storage.local.set({ thinking: true, effort: "high" }));
   });
