@@ -6,6 +6,11 @@ export const MODELS = ['deepseek-flash', 'deepseek-v4-pro'] as const;
 /** 图片、文件和联网工具只适用的模型。 */
 export const FLASH_MODEL = 'deepseek-flash';
 
+/** 思考强度。只在开启深度思考时作为 reasoning_effort 发送。 */
+export const EFFORTS = ['low', 'high', 'max'] as const;
+export type Effort = (typeof EFFORTS)[number];
+export const isEffort = (value: unknown): value is Effort => EFFORTS.some((candidate) => candidate === value);
+
 export interface Usage {
   prompt: number;
   cacheHit: number;
@@ -68,6 +73,8 @@ export interface ChatOptions {
   /** 声明 deepseek_web_search 和 deepseek_read_url。 */
   search?: boolean;
   maxTokens?: number;
+  /** 只在 thinking 为 true 时发送。 */
+  effort?: Effort;
   signal?: AbortSignal;
   /** 正文与全程思考的累计值，供前端显示。 */
   onDelta?: (text: string, reasoning: string) => void;
@@ -152,6 +159,7 @@ export async function streamChat(opts: ChatOptions): Promise<ChatResult> {
         stream: true,
         stream_options: { include_usage: true },
         thinking: { type: opts.thinking ? 'enabled' : 'disabled' },
+        ...(opts.thinking && opts.effort && { reasoning_effort: opts.effort }),
         ...(opts.search && { tools: [{ type: 'deepseek_web_search' }, { type: 'deepseek_read_url' }] }),
       }),
     });

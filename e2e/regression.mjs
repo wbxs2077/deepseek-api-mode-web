@@ -1145,6 +1145,38 @@ try {
     await worker.evaluate(() => chrome.storage.local.set({ model: "deepseek-flash" }));
   });
 
+  await test("v0.4.0 popup effort is remembered and sent only while thinking is on", async (e) => {
+    const popupUrl = `chrome-extension://${extId}/popup.html`;
+    await worker.evaluate(() => chrome.storage.local.set({ thinking: true }));
+    await worker.evaluate(() => chrome.storage.local.remove("effort"));
+    let pop = await ctx.newPage();
+    await pop.goto(popupUrl);
+    const effort = () => pop.getByLabel("思考强度");
+    await effort().waitFor();
+    assert.equal(await effort().inputValue(), "high", "default effort");
+    await effort().selectOption("max");
+    await until(() => worker.evaluate(async () => (await chrome.storage.local.get("effort")).effort === "max"), "max saved");
+    await pop.close();
+
+    const { id, v } = await populatedWithoutImages();
+    e.withThinking = { thinking: (await lastCall()).thinking, effort: (await lastCall()).reasoning_effort };
+    assert.deepEqual(e.withThinking, { thinking: { type: "enabled" }, effort: "max" });
+    await choose(v, "深度思考");
+    await until(() => worker.evaluate(async () => (await chrome.storage.local.get("thinking")).thinking === false), "thinking off");
+    await send(v, id, "NO-THINKING");
+    const off = await lastCall();
+    assert.deepEqual(off.thinking, { type: "disabled" });
+    assert(!("reasoning_effort" in off), "effort omitted without thinking");
+
+    pop = await ctx.newPage();
+    await pop.goto(popupUrl);
+    await effort().waitFor();
+    assert.equal(await effort().inputValue(), "max", "effort restored");
+    assert(await effort().isDisabled(), "effort disabled while thinking is off");
+    await pop.close();
+    await worker.evaluate(() => chrome.storage.local.set({ thinking: true, effort: "high" }));
+  });
+
   await test("v0.3.2 confirm card estimates the cost before the first send", async (e) => {
     const id = fresh(),
       v = await page(id);

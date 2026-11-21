@@ -19,7 +19,7 @@ function sseResponse(chunks: string[], signal?: AbortSignal, hang = false): Resp
 
 const done = 'data: [DONE]\n\n';
 
-const base = { apiKey: 'sk-test', model: 'deepseek-flash', thinking: true, messages: [{ role: 'user' as const, content: 'hi' }] };
+const base = { apiKey: 'sk-test', model: 'deepseek-flash', thinking: true, effort: 'high' as const, messages: [{ role: 'user' as const, content: 'hi' }] };
 
 describe('createSseParser', () => {
   it('reassembles lines split at arbitrary positions', () => {
@@ -59,6 +59,7 @@ describe('streamChat', () => {
       stream: true,
       stream_options: { include_usage: true },
       thinking: { type: 'enabled' },
+      reasoning_effort: 'high',
     });
     expect(result).toEqual({
       text: '你好', reasoning: '想', replayReasoning: '想', finish: 'stop', aborted: false, status: 'complete',
@@ -66,6 +67,22 @@ describe('streamChat', () => {
       serverToolCalls: null, annotations: [], toolUse: null,
     });
     expect(deltas).toEqual(['想|', '想|你', '想|你好']);
+  });
+
+  it.each([
+    { thinking: true, effort: 'low' as const, sent: 'low' },
+    { thinking: true, effort: 'max' as const, sent: 'max' },
+    { thinking: false, effort: 'max' as const, sent: undefined },
+    { thinking: true, effort: undefined, sent: undefined },
+  ])('sends reasoning_effort=$sent for thinking=$thinking effort=$effort', async ({ thinking, effort, sent }) => {
+    let body: Record<string, unknown> = {};
+    await streamChat({ ...base, thinking, effort, fetchImpl: async (_, init) => {
+      body = JSON.parse(init!.body as string);
+      return sseResponse([event({ content: 'ok' }, { finish_reason: 'stop' }), done]);
+    } });
+    expect(body.thinking).toEqual({ type: thinking ? 'enabled' : 'disabled' });
+    if (sent) expect(body.reasoning_effort).toBe(sent);
+    else expect(body).not.toHaveProperty('reasoning_effort');
   });
 
   it.each([

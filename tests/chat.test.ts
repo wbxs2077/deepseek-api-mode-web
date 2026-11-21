@@ -36,7 +36,7 @@ function fakeApi(...replies: { chunks: string[]; fail?: boolean; hang?: boolean 
   return { fetchImpl, bodies };
 }
 
-const config = { apiKey: 'sk-test', model: 'deepseek-flash', thinking: false, maxTokens: 8192, search: false };
+const config = { apiKey: 'sk-test', model: 'deepseek-flash', thinking: false, effort: 'high' as const, maxTokens: 8192, search: false };
 const NOW = new Date(2026, 10, 20, 9, 30);
 const REMINDER = '2026-11-20,星期五,,Web,中文';
 const now = () => NOW;
@@ -213,6 +213,7 @@ describe('runChat', () => {
     const body = api.bodies[0] as any;
     expect(body.model).toBe('deepseek-flash');
     expect(body.tools).toHaveLength(2);
+    expect(body).not.toHaveProperty('reasoning_effort');
     expect(body.messages.at(-1)).toEqual({ role: 'user', content: [{ type: 'file', file_id: 'file-api-1' }] });
     expect(saved.turns).toEqual([
       sent('', { attachments: [pic] }),
@@ -254,8 +255,9 @@ describe('runChat', () => {
       event({ content: 'a1', server_tool_calls: calls }, { finish_reason: 'stop' }), done,
     ] }, { chunks: complete('a2') });
     await runChat({ sessionId: record.sessionId, expected: record, action: { kind: 'send', text: 'q1' },
-      config: { ...config, search: true, thinking: true }, fetchImpl: api.fetchImpl, now,
+      config: { ...config, search: true, thinking: true, effort: 'max' }, fetchImpl: api.fetchImpl, now,
       onLive: (_, reasoning) => live.push(reasoning) });
+    expect((api.bodies[0] as { reasoning_effort?: string }).reasoning_effort).toBe('max');
     expect(live.at(-1)).toBe('查读' + final);
     const saved = (await getSession(record.sessionId))!;
     expect(saved.turns[1]).toMatchObject({ reasoning: '查读' + final, replayReasoning: final, serverToolCalls: calls });

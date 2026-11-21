@@ -120,8 +120,8 @@ function cleanRecord(v: unknown): SessionRecord | null {
 }
 
 async function settingsView(): Promise<SettingsView> {
-  const { apiKey, model, thinking, maxTokens, search } = await loadSettings();
-  return { hasKey: !!apiKey, model, thinking, maxTokens, search };
+  const { apiKey, model, thinking, effort, maxTokens, search } = await loadSettings();
+  return { hasKey: !!apiKey, model, thinking, effort, maxTokens, search };
 }
 
 async function drainSession(sessionId: string, ids?: string[]) {

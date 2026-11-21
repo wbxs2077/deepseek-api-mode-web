@@ -449,7 +449,7 @@ export function App({ sessionId, layout, thread: threadHost, composer, notice }:
     post({
       type: 'run',
       sessionId,
-      options: { model: settings.model, thinking: settings.thinking, search: settings.search, maxTokens: settings.maxTokens },
+      options: { model: settings.model, thinking: settings.thinking, effort: settings.effort, search: settings.search, maxTokens: settings.maxTokens },
       expected: action.kind === 'edit' && editing
         ? { importedAt: editing.importedAt, updatedAt: editing.updatedAt }
         : { importedAt: current.importedAt, updatedAt: current.updatedAt },
@@ -980,9 +980,9 @@ function CostEstimate({ record, settings, images }: { record: SessionRecord; set
     return {
       input: estimateRequest(built.messages, images),
       model: effective,
-      output: settings.maxTokens || defaultOutput(settings.thinking),
+      output: settings.maxTokens || defaultOutput(settings.thinking, settings.effort),
     };
-  }, [record, settings.model, settings.search, settings.thinking, settings.maxTokens, images]);
+  }, [record, settings.model, settings.search, settings.thinking, settings.effort, settings.maxTokens, images]);
   const peak = isPeak(new Date());
   return (
     <ul class="estimate">

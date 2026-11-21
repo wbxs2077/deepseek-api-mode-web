@@ -16,7 +16,7 @@ The UI is in Chinese. An Android counterpart is at [deepseek-api-mode-android](h
 ## Features
 
 - In-page "Official / API" switch with separate drafts
-- Streaming, reasoning, smart search (web search and URL reading) with citations
+- Streaming, reasoning with low/high/max effort, smart search (web search and URL reading) with citations
 - Attachments: picker, drag and drop, pasted screenshots. PDF, Word and PowerPoint use layout-aware parsing.
 - Optionally carries images from the official history
 - Shows an estimated cost before sending, the cost of each reply, and your balance in the popup
@@ -34,7 +34,7 @@ npm ci
 npm run build        # output: .output/chrome-mv3/
 ```
 
-Then open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick `.output/chrome-mv3`. Click the toolbar icon to enter your API key.
+Then open `chrome://extensions`, turn on Developer mode, click "Load unpacked" and pick `.output/chrome-mv3`. Click the toolbar icon to enter your API key. The popup also sets the default model, deep thinking, reasoning effort (low, high or max; default high, used only while deep thinking is on), smart search and the output limit.
 
 ## Permissions and privacy
 

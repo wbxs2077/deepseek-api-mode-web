@@ -456,8 +456,8 @@ try {
     e.ui = await v.run(`const ui={model:comp.querySelector('select').value,search:btn('智能搜索').getAttribute('aria-pressed')==='true',thinking:btn('深度思考').getAttribute('aria-pressed')==='true'};if (send.disabled) throw Error('cannot send');send.click();return ui`);
     await until(async()=>(await contents(id))?.at(-1)==='REPLY-tab-A','tab A reply');
     const body = await lastCall();
-    e.wire = {model:body.model,tools:(body.tools??[]).map(t=>t.type).sort(),thinking:body.thinking?.type};
-    assert.deepEqual(e.wire,{model:e.ui.search?'deepseek-flash':e.ui.model, tools:e.ui.search?['deepseek_read_url','deepseek_web_search']:[],thinking:e.ui.thinking?'enabled':'disabled'});
+    e.wire = {model:body.model,tools:(body.tools??[]).map(t=>t.type).sort(),thinking:body.thinking?.type,effort:body.reasoning_effort};
+    assert.deepEqual(e.wire,{model:e.ui.search?'deepseek-flash':e.ui.model, tools:e.ui.search?['deepseek_read_url','deepseek_web_search']:[],thinking:e.ui.thinking?'enabled':'disabled',effort:e.ui.thinking?'high':undefined});
   });
   await test('搜索中间步和末步的 reasoning 在下一轮分别回放', async e => {
     const {id,v} = await populatedWithoutImages();

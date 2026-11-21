@@ -2,10 +2,11 @@ import { browser } from 'wxt/browser';
 import type { BalanceReply, PopupReply, PopupRequest } from '../../protocol';
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { MODELS } from '../../core/client';
+import { EFFORTS, MODELS, type Effort } from '../../core/client';
 import { loadSettings, OUTPUT_LIMITS, saveSettings, type Settings } from '../../settings';
 
 const num = (n: number) => n.toLocaleString('zh-CN');
+const EFFORT_LABELS: Record<Effort, string> = { low: '低（low）', high: '高（high）', max: '最高（max）' };
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 function Popup() {
@@ -105,12 +106,19 @@ function Popup() {
         <label>
           输出上限
           <select value={settings.maxTokens} onChange={(e) => patch({ maxTokens: Number(e.currentTarget.value) })}>
-            {OUTPUT_LIMITS.map((n) => <option key={n} value={n}>{n ? `${num(n)} tokens` : '跟随官方（思考时最多 64K）'}</option>)}
+            {OUTPUT_LIMITS.map((n) => <option key={n} value={n}>{n ? `${num(n)} tokens` : '跟随官方（思考时最多 64K，最高强度 128K）'}</option>)}
           </select>
         </label>
         <label class="check">
           <input type="checkbox" checked={settings.thinking} onChange={(e) => patch({ thinking: e.currentTarget.checked })} />
           深度思考
+        </label>
+        <label>
+          思考强度
+          <select value={settings.effort} disabled={!settings.thinking}
+            onChange={(e) => patch({ effort: e.currentTarget.value as Effort })}>
+            {EFFORTS.map((e) => <option key={e} value={e}>{EFFORT_LABELS[e]}</option>)}
+          </select>
         </label>
         <label class="check">
           <input type="checkbox" checked={settings.search} onChange={(e) => patch({ search: e.currentTarget.checked })} />

@@ -1,4 +1,4 @@
-import { streamChat, type ChatResult, type ChatStatus, type ToolEvent } from './client';
+import { streamChat, type ChatResult, type ChatStatus, type Effort, type ToolEvent } from './client';
 import { MAX_FILES_PER_MESSAGE, type Attachment } from './files';
 import { actualCost, isPeak } from './pricing';
 import { buildRequest, reminderFor } from './request';
@@ -15,6 +15,7 @@ export interface ChatConfig {
   apiKey: string;
   model: string;
   thinking: boolean;
+  effort: Effort;
   maxTokens: number;
   search: boolean;
 }
@@ -150,6 +151,7 @@ export async function runChat(opts: RunChatOptions): Promise<RunChatResult> {
     apiKey: config.apiKey,
     model: request.model,
     thinking: config.thinking,
+    effort: config.effort,
     maxTokens: config.maxTokens || undefined,
     search: config.search,
     signal,
